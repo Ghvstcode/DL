@@ -1,3 +1,5 @@
+mod cli;
+
 use std::{io, process};
 use io::Result;
 

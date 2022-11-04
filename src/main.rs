@@ -1,7 +1,10 @@
 mod cli;
+mod app;
+mod file;
 
 use std::{io, process};
 use io::Result;
+use crate::app::App;
 
 fn main() {
     let result = run();
@@ -22,5 +25,16 @@ fn main() {
 
 
 fn run() ->Result<bool> {
+    let app = App::new();
+    match app {
+        Err(error) => {
+            let stderr = io::stderr();
+            process::exit(1);
+        }
+
+        Ok(app) =>{
+            app.run()
+        }
+    }
   return Ok(true)
 }

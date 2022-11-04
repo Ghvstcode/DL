@@ -1,4 +1,4 @@
-use clap::{crate_version, AppSettings, Arg, ColorChoice, Command, crate_authors};
+use clap::{crate_version, Arg, ColorChoice, Command, crate_authors};
 
 pub fn build_app() -> Command {
     let clap_color_choice = if std::env::var_os("NO_COLOR").is_none() {
@@ -27,7 +27,16 @@ pub fn build_app() -> Command {
                     // TODO: A better long description
                     "open a new log file",
                 ),
-        );
+        ).arg(
+        Arg::new("path")
+            .long("path")
+            .short('P')
+            .help("absolute path to log file location")
+            .long_help(
+                // TODO: A better long description
+                "absolute path to log file location",
+            ),
+    );
 
     app
 }

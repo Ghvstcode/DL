@@ -1,20 +1,21 @@
+use crate::file::FileOps;
 use std::error::Error;
 use std::io;
 use clap::{ArgMatches, crate_authors, crate_version};
-use crate::file::FileOps;
 use std::path::{Path, PathBuf};
-use chrono::{Utc};
+use chrono::{Datelike, Utc};
+use std::fmt::{self, Formatter, Display};
 
 pub struct App {
    pub matches: ArgMatches,
-    file_ops: dyn FileOps,
+   file_ops: FileOps,
 }
 
 impl App {
-    pub fn new() -> Result<Self, io::Error> {
+    pub fn new() -> Result<App, io::Error> {
         Ok(App {
             matches: ()?,
-            file_ops: ()
+            file_ops: ()?
         })
     }
 
@@ -23,17 +24,16 @@ impl App {
     // This should exist in file ops & should return PathBuf
     fn get_filename_from_date(&self){}
 
-    fn get_todays_date(){
+    fn get_todays_date(&self) -> String {
         let now = Utc::now();
-        println!(
-            "The current UTC date is {}-{:02}-{:02} {:?} ({})",
-            year,
+        format!(
+            "{}-{:02}-{:02}",
+            now.year(),
             now.month(),
             now.day(),
-            now.weekday(),
-            if is_common_era { "CE" } else { "BCE" }
         )
     }
+
     pub fn run(&self) -> &'static str {
         // If config file does not exist, we should create a new one.
         // New config file should have default values(File has template, File format)
@@ -61,6 +61,11 @@ impl App {
                 }
 
                 // Call FileOps to generate new DL file.
+                let mut td_date = self.get_todays_date();
+                let inc_file_path = self.file_ops.path_from_date(&mut td_date);
+                if inc_file_path.exists(){
+                    // Print that a file with today's date already exists & if they should provide a path
+                }
                 println!("Open file at this path {}", path)
             }
         }

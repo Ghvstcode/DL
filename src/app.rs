@@ -1,10 +1,12 @@
 use std::error::Error;
 use std::io;
-use clap::ArgMatches;
+use clap::{ArgMatches, crate_authors, crate_version};
 use crate::file::FileOps;
+use std::path::{Path, PathBuf};
+use chrono::{Utc};
 
 pub struct App {
-    pub matches: ArgMatches,
+   pub matches: ArgMatches,
     file_ops: dyn FileOps,
 }
 
@@ -21,6 +23,17 @@ impl App {
     // This should exist in file ops & should return PathBuf
     fn get_filename_from_date(&self){}
 
+    fn get_todays_date(){
+        let now = Utc::now();
+        println!(
+            "The current UTC date is {}-{:02}-{:02} {:?} ({})",
+            year,
+            now.month(),
+            now.day(),
+            now.weekday(),
+            if is_common_era { "CE" } else { "BCE" }
+        )
+    }
     pub fn run(&self) -> &'static str {
         // If config file does not exist, we should create a new one.
         // New config file should have default values(File has template, File format)
@@ -35,23 +48,21 @@ impl App {
             // The config has already been setup
 
             // Check if the new arg was specified
-            if let Some(new_dl) = Self.matches.try_get_one("new"){
+            if let Some(_new_dl) = Self.matches{
                 // Check if the path arg was specified
                 if let Some(path) = Self.matches.try_get_one("path"){
+                   let path_b = PathBuf::from(path);
+                    // Check if the file path already exists,
+                    if path_b.exists(){
+                        println!("cannot open a new file with name {} it already exists", path)
+                    }
+                    // Call FileOps to generate new DL file.
                     println!("Open file at this path {}", path);
                 }
-                println!("Open file at this path {}", path);
+
+                // Call FileOps to generate new DL file.
+                println!("Open file at this path {}", path)
             }
-
-           match Self.matches.try_get_one("path"){
-               Some(x) => {
-                   match Self.matches.try_get_one("path"){
-                       Some()
-                   }
-               }
-           }
-
-            let date = self.get_filename_from_date();
         }
     }
 }

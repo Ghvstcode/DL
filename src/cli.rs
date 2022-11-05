@@ -35,7 +35,7 @@ pub fn build_app() -> Command {
             .long_help(
                 // TODO: A better long description
                 "absolute path to log file location",
-            ),
+            )
     );
 
     app

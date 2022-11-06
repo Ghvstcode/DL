@@ -43,8 +43,8 @@ impl App {
         // if there is a filename param, we should ignore the above function --
         // and attempt to retrieve the file from the directory specified in the config_path.
         // If the file does not exist, We should ask the user if they would like to create the file in that path
-        if self.file_ops.config_file().exists(){
-            println!("File exists {}", self.file_ops.config_file().display())
+        if self.file_ops.config_file_path().exists(){
+            println!("File exists {}", self.file_ops.config_file_path().display())
             //dbg!("missing config — creating new config file")
         } else {
             // The config has already been setup
@@ -64,7 +64,7 @@ println!("todaysDate {}", self.get_todays_date());
 
                 // Call FileOps to generate new DL file.
                 let mut td_date = self.get_todays_date();
-                let inc_file_path = self.file_ops.path_from_date(&mut td_date);
+                let inc_file_path = self.file_ops.path_from_date(td_date);
                 if inc_file_path.exists(){
                     // Print that a file with today's date already exists & if they should provide a path
                     println!("missing config — creating new config file")
@@ -72,6 +72,9 @@ println!("todaysDate {}", self.get_todays_date());
 
                 //println!("Open file at this path {}", inc_file_path.display())
             }
+            let mut td_date = self.get_todays_date();
+            let dp = self.file_ops.path_from_date(td_date);
+            println!("This is the path that the file will be created {}", dp.display())
         }
     }
 }

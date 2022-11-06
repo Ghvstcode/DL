@@ -8,3 +8,6 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.0.18", features = ["cargo"] }
 chrono = "0.4.22"
+dirs = "4.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"

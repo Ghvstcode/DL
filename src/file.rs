@@ -15,9 +15,12 @@ use std::path::PathBuf;
 //     // it returns a full path based on the root dir in the config & The file type in the config
 //    fn path_from_date(&self, date: &String) -> PathBuf;
 // }
-pub(crate) struct FileOps;
+pub struct FileOps;
 
 impl FileOps {
+    pub fn new(&self) -> Self {
+        return FileOps
+    }
     pub fn generate_dl_file(&self) -> Result<(), io::Error> {
         todo!()
     }
@@ -27,7 +30,7 @@ impl FileOps {
     }
 
     pub fn config_file(&self) -> PathBuf {
-        todo!()
+        return PathBuf::default();
     }
 
     pub fn file_exists(&self) -> PathBuf {

@@ -7,7 +7,7 @@ pub fn build_app() -> Command {
         ColorChoice::Never
     };
 
-    let mut app = Command::new("dl")
+    let app = Command::new("dl")
         .author(crate_authors!())
         .version(crate_version!())
         .about("Log or journal daily updates on your life/career with ease")

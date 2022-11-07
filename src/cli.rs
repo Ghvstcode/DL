@@ -28,9 +28,9 @@ pub fn build_app() -> Command {
                     "open a new log file",
                 ),
         ).arg(
-        Arg::new("path")
-            .long("path")
-            .short('P')
+        Arg::new("file")
+            .long("file")
+            .short('f')
             .help("absolute path to log file location")
             .long_help(
                 // TODO: A better long description

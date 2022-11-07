@@ -23,10 +23,11 @@ extern crate dirs;
 // }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Default)]
-struct Config {
-    dir: PathBuf,
-    file_ext: String,
-    editor: String
+pub struct Config {
+    pub dir: PathBuf,
+    pub file_ext: String,
+    pub editor: String,
+    pub with_template: String
 }
 
 pub struct FileOps;
@@ -35,7 +36,18 @@ impl FileOps {
     pub fn new(&self) -> Self {
         return FileOps
     }
- 
+    pub fn generate_dl_file(&self, with_template:bool, file_path: &PathBuf) -> Result<(), io::Error> {
+        let mut template = format!(r#"## {}"#, file_path.file_name().expect("invalid file name").to_string_lossy());
+
+        if with_template{
+            template.push_str("An extension of the template")
+        }
+
+        fs::write(&file_path, template)?;
+
+
+        Ok(())
+    }
 
     pub fn generate_config_file(&self) -> Result<(), io::Error> {
         todo!()
@@ -45,26 +57,30 @@ impl FileOps {
         home_dir().unwrap().join(".config").join("daily_logger").join("daily_logger.yaml")
     }
 
+
     pub fn get_args_from_env_var(&self, key: &str) -> Result<String, VarError> {
         let mut full_key = String::from(key);
         full_key.insert_str(0, "DL_");
         env::var(full_key)
     }
 
-    fn config_args(&self) -> Config {
+    pub fn config_args(&self) -> Config {
         let mut config = match self.get_cfg_file_args() {
             Ok(config) => config,
             Err(err) => {
                 //println!("{}", err);
+                dbg!(err);
                 Config::default()
             }
         };
 
         match self.get_args_from_env_var("DIR") {
-            Ok(s) => config.dir = s.parse().unwrap(),
+
+            Ok(s) => {config.dir = s.parse().unwrap();
+            println!("{}", config.dir.display())},
             _ => {
                 //TODO remove this bit
-                config.dir = String::from("/Users/tobi/documents").parse().unwrap()
+                //config.dir = String::from("/Users/tobi/documents").parse().unwrap()
             }
         }
 
@@ -85,15 +101,22 @@ impl FileOps {
         let mut file = fs::File::open(&config_file_path)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
-
-        // if contents.is_empty() {
-        //     Ok(Config::default())
-        // }
-
         Ok(serde_yaml::from_str(&contents).unwrap())
     }
 
-    fn get_config_param(&self) -> io::Result<Config> {todo!()}
+    // fn get_config_param(&self, arg_name: String) -> String {
+    //    let config =  self.config_args();
+    //     match arg_name.as_str() {
+    //         "" =>{
+    //
+    //         }
+    //
+    //         _ => {
+    //
+    //         }
+    //     }
+    // }
+
     pub fn file_exists(&self) -> PathBuf {
         todo!()
     }
@@ -109,9 +132,6 @@ impl FileOps {
         let dir = config.dir.join(date);
 
         return dir;
-       // let file_with_ext = date.push_str(".md");
-       // // This should include the specified file extension
-       //  PathBuf::from(root_path).join(file_with_ext)
    }
 }
 

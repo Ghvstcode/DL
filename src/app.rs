@@ -48,18 +48,30 @@ impl App {
             //dbg!("missing config — creating new config file")
         } else {
             // The config has already been setup
-println!("todaysDate {}", self.get_todays_date());
             // Check if the new arg was specified
-            if let Ok(Some(_new_dl)) = self.matches.try_get_one::<OsString>(""){
+            if let Ok(Some(new_dl)) = self.matches.try_get_one::<String>("new"){
+                println!("new val = {}", new_dl);
                 // Check if the path arg was specified
-                if let Ok(Some(path)) = self.matches.try_get_one::<PathBuf>("path"){
-                   let path_b = PathBuf::from(path);
+                if let Ok(Some(path)) = self.matches.try_get_one::<String>("file"){
+                    let mut config = self.file_ops.config_args();
+                    let inc_path = config.dir.join(path);
                     // Check if the file path already exists,
-                    if path_b.exists(){
-                        println!("cannot open a new file with name {} it already exists", path.display())
+                    if inc_path.exists(){
+                        println!("cannot open a new file with name {} it already exists", inc_path.display())
                     }
+                    println!("new path to be created = {}", inc_path.display());
                     // Call FileOps to generate new DL file.
-                    println!("Open file at this path {}", path.display());
+                    let _ = match self.file_ops.generate_dl_file(config.with_template, &inc_path){
+                        Ok(_) => {}
+                        Err(err) => {
+                            println!("{}", err)
+                        }
+                    };
+
+                    // OPEN THE FILE WITH THE PREFFERED EDITOR
+
+                    // Call FileOps to generate new DL file.
+                    println!("Open file at this path {}", inc_path.display());
                 }
 
                 // Call FileOps to generate new DL file.

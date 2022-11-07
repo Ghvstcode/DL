@@ -27,7 +27,7 @@ pub struct Config {
     pub dir: PathBuf,
     pub file_ext: String,
     pub editor: String,
-    pub with_template: String
+    pub with_template: bool
 }
 
 pub struct FileOps;
@@ -86,6 +86,23 @@ impl FileOps {
 
         match self.get_args_from_env_var("EXT") {
             Ok(s) => config.dir = s.parse().unwrap(),
+            _ => {
+                config.file_ext = String::from(".md").parse().unwrap()
+            }
+        }
+
+        match self.get_args_from_env_var("TEMPL") {
+            Ok(s) => {
+                let truth_value: bool = match s.as_str() {
+                    "true" => true,
+                    "t" => true,
+                    "false" => false,
+                    "f" => false,
+                    _ => false
+                };
+
+                config.with_template = truth_value;
+            }
             _ => {
                 config.file_ext = String::from(".md").parse().unwrap()
             }

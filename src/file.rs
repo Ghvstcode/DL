@@ -3,6 +3,7 @@ use std::env::VarError;
 use std::ffi::OsString;
 use std::io::{ErrorKind, Read, Write};
 use std::path::PathBuf;
+use std::process::{Command, ExitStatus};
 use dirs::{config_dir, home_dir};
 use serde::{Serialize, Deserialize};
 use serde_yaml::Value::Null;
@@ -150,6 +151,10 @@ impl FileOps {
 
         return dir;
    }
+
+    pub fn open_program(&self, file_path: PathBuf, program: &str) -> ExitStatus {
+        Command::new(&program).arg(&file_path).status().expect("failed to execute process")
+    }
 }
 
 

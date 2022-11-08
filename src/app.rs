@@ -36,6 +36,7 @@ impl App {
     }
 
     pub fn run(&self){
+        let mut config = self.file_ops.config_args();
         // If config file does not exist, we should create a new one.
         // New config file should have default values(File has template, File format)
         // If config file exists, we should attempt to see if a file for today's log exists
@@ -53,7 +54,7 @@ impl App {
                 println!("new val = {}", new_dl);
                 // Check if the path arg was specified
                 if let Ok(Some(path)) = self.matches.try_get_one::<String>("file"){
-                    let mut config = self.file_ops.config_args();
+                   // let mut config = self.file_ops.config_args();
                     let inc_path = config.dir.join(path);
                     // Check if the file path already exists,
                     if inc_path.exists(){
@@ -67,11 +68,11 @@ impl App {
                             println!("{}", err)
                         }
                     };
-
+let str = "nvim";
                     // OPEN THE FILE WITH THE PREFFERED EDITOR
-
+self.file_ops.open_program(inc_path, str);
                     // Call FileOps to generate new DL file.
-                    println!("Open file at this path {}", inc_path.display());
+                    //println!("Open file at this path {}", inc_path.display());
                 }
 
                 // Call FileOps to generate new DL file.
@@ -86,7 +87,10 @@ impl App {
             }
             let mut td_date = self.get_todays_date();
             let dp = self.file_ops.path_from_date(td_date);
-            println!("This is the path that the file will be created {}", dp.display())
+            let str = "vim";
+            // OPEN THE FILE WITH THE PREFFERED EDITOR
+            self.file_ops.open_program(dp, str);
+            //println!("This is the path that the file will be created {}", dp.display())
         }
     }
 }

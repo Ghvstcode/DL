@@ -10,25 +10,20 @@ use serde_yaml::Value::Null;
 
 extern crate dirs;
 
-// pub trait FileOps {
-//     // Take in a specific date and populate it with template data
-//     // Should only be used if the user wants the template
-//     fn generate_dl_file(&self) -> Result<(), E>;
-//     fn generate_config_file(&self) -> Result<(), E>;
-//     fn config_file(&self) -> PathBuf;
-//     fn file_exists(&self) -> PathBuf;
-//     // Since we default to using date as file names
-//     // This function takes in a date in String format
-//     // it returns a full path based on the root dir in the config & The file type in the config
-//    fn path_from_date(&self, date: &String) -> PathBuf;
-// }
-
 #[derive(Debug, PartialEq, Serialize, Deserialize, Default)]
 pub struct Config {
     pub dir: PathBuf,
     pub file_ext: String,
     pub editor: String,
     pub with_template: bool
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum ConfigArg {
+    Dir,
+    FileExt,
+    Editor,
+    WithTemplate
 }
 
 pub struct FileOps;
@@ -75,8 +70,7 @@ impl FileOps {
         };
 
         match self.get_args_from_env_var("DIR") {
-            Ok(s) => {config.dir = s.parse().unwrap();
-            println!("{}", config.dir.display())},
+            Ok(s) => {config.dir = s.parse().unwrap()},
             _ => {}
         }
 
@@ -102,6 +96,11 @@ impl FileOps {
             }
         }
 
+        match self.get_args_from_env_var("EDITOR") {
+            Ok(s) => config.editor = s.parse().unwrap(),
+            _ => {}
+        }
+
         config
     }
 
@@ -114,11 +113,7 @@ impl FileOps {
         file.read_to_string(&mut contents)?;
         Ok(serde_yaml::from_str(&contents).unwrap())
     }
-    
 
-    // Since we default to using date as file names
-    // This function takes in a date in String format
-    // it returns a full path based on the root dir in the config & The file type in the config
    pub fn path_from_date(&self, mut date: String) -> PathBuf{
        let config = self.config_args();
 
@@ -131,6 +126,46 @@ impl FileOps {
 
     pub fn open_program(&self, file_path: PathBuf, program: &str) -> ExitStatus {
         Command::new(&program).arg(&file_path).status().expect("failed to execute process")
+    }
+
+    fn bool_from_string(&self, value: String) -> bool{
+        let truth_value: bool = match value.as_str() {
+            "true" => true,
+            "t" => true,
+            "false" => false,
+            "f" => false,
+            _ => false
+        };
+
+        return truth_value
+    }
+    pub fn set_config(&self, config_type: ConfigArg, value: String) -> io::Result<()> {
+        let config_path = self.config_file_path();
+
+        // Create file if it doesn't exist, otherwise get it
+        let mut file = fs::File::create(config_path)?;
+
+        let mut config = self.config_args();
+        match config_type {
+            ConfigArg::Dir => config.dir = PathBuf::from(value),
+            ConfigArg::Editor => config.editor = value,
+            ConfigArg::FileExt => config.file_ext = value,
+            ConfigArg::WithTemplate => {
+                let truth_value: bool = match value.as_str() {
+                    "true" => true,
+                    "t" => true,
+                    "false" => false,
+                    "f" => false,
+                    _ => false
+                };
+
+                config.with_template = truth_value;
+            }
+        }
+
+        let json = serde_json::to_string(&config)?;
+
+        file.write_all(json.as_bytes())
     }
 }
 

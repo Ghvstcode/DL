@@ -85,12 +85,10 @@ self.file_ops.open_program(inc_path, str);
 
                 //println!("Open file at this path {}", inc_file_path.display())
             }
+
             let mut td_date = self.get_todays_date();
             let dp = self.file_ops.path_from_date(td_date);
-            let str = "vim";
-            // OPEN THE FILE WITH THE PREFFERED EDITOR
-            self.file_ops.open_program(dp, str);
-            //println!("This is the path that the file will be created {}", dp.display())
+            self.file_ops.open_program(dp, config.editor.as_str());
         }
     }
 }

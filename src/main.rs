@@ -14,16 +14,13 @@ fn main() {
     let result = run();
 
     match result {
-        Err(error) => {
-            let stderr = io::stderr();
-            process::exit(1);
-        }
         Ok(false) => {
             process::exit(1);
         }
         Ok(true) => {
             process::exit(0);
         }
+        _ => {}
     }
 }
 
@@ -35,7 +32,7 @@ fn run() ->Result<bool> {
     let file_ops = FileOps.new();
     let app = App::new(matches, file_ops);
     match app {
-        Err(error) => {
+        Err(_error) => {
             let stderr = io::stderr();
             process::exit(1);
         }

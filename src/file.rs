@@ -69,27 +69,20 @@ impl FileOps {
         let mut config = match self.get_cfg_file_args() {
             Ok(config) => config,
             Err(err) => {
-                //println!("{}", err);
                 dbg!(err);
                 Config::default()
             }
         };
 
         match self.get_args_from_env_var("DIR") {
-
             Ok(s) => {config.dir = s.parse().unwrap();
             println!("{}", config.dir.display())},
-            _ => {
-                //TODO remove this bit
-                //config.dir = String::from("/Users/tobi/documents").parse().unwrap()
-            }
+            _ => {}
         }
 
         match self.get_args_from_env_var("EXT") {
             Ok(s) => config.dir = s.parse().unwrap(),
-            _ => {
-                config.file_ext = String::from(".md").parse().unwrap()
-            }
+            _ => {}
         }
 
         match self.get_args_from_env_var("TEMPL") {
@@ -121,23 +114,7 @@ impl FileOps {
         file.read_to_string(&mut contents)?;
         Ok(serde_yaml::from_str(&contents).unwrap())
     }
-
-    // fn get_config_param(&self, arg_name: String) -> String {
-    //    let config =  self.config_args();
-    //     match arg_name.as_str() {
-    //         "" =>{
-    //
-    //         }
-    //
-    //         _ => {
-    //
-    //         }
-    //     }
-    // }
-
-    pub fn file_exists(&self) -> PathBuf {
-        todo!()
-    }
+    
 
     // Since we default to using date as file names
     // This function takes in a date in String format

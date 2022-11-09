@@ -81,15 +81,7 @@ impl FileOps {
 
         match self.get_args_from_env_var("TEMPL") {
             Ok(s) => {
-                let truth_value: bool = match s.as_str() {
-                    "true" => true,
-                    "t" => true,
-                    "false" => false,
-                    "f" => false,
-                    _ => false
-                };
-
-                config.with_template = truth_value;
+                config.with_template = self.bool_from_string(value);;
             }
             _ => {
                 config.file_ext = String::from(".md").parse().unwrap()
@@ -151,15 +143,7 @@ impl FileOps {
             ConfigArg::Editor => config.editor = value,
             ConfigArg::FileExt => config.file_ext = value,
             ConfigArg::WithTemplate => {
-                let truth_value: bool = match value.as_str() {
-                    "true" => true,
-                    "t" => true,
-                    "false" => false,
-                    "f" => false,
-                    _ => false
-                };
-
-                config.with_template = truth_value;
+                config.with_template = self.bool_from_string(value);;
             }
         }
 

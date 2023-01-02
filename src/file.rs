@@ -2,7 +2,7 @@ use std::{env, fs, io};
 use std::env::VarError;
 use std::ffi::OsString;
 use std::io::{ErrorKind, Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, ExitStatus};
 use dirs::{config_dir, home_dir};
 use serde::{Serialize, Deserialize};
@@ -81,7 +81,7 @@ impl FileOps {
 
         match self.get_args_from_env_var("TEMPL") {
             Ok(s) => {
-                config.with_template = self.bool_from_string(value);;
+                config.with_template = self.bool_from_string(s);
             }
             _ => {
                 config.file_ext = String::from(".md").parse().unwrap()
@@ -97,13 +97,27 @@ impl FileOps {
     }
 
     pub fn get_cfg_file_args(&self) -> io::Result<Config> {
+        //let serd_res;
         let config_file_path = self.config_file_path();
         fs::metadata(&config_file_path)?;
 
         let mut file = fs::File::open(&config_file_path)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
-        Ok(serde_yaml::from_str(&contents).unwrap())
+        // let serd_res =  serde_yaml::from_str(&contents).map_err(|_| {
+        //     io::Error::new(
+        //         ErrorKind::InvalidData,
+        //         "Couldn't parse received string as utf8",
+        //     )
+        // });
+        serde_yaml::from_str(&contents)?
+       //  let result;
+       //  if let Ok(val) = serde_yaml::from_str(&contents).unwrap(){
+       //      result = val
+       // } else {
+       //     result = Config
+       // };
+       //  result
     }
 
    pub fn path_from_date(&self, mut date: String) -> PathBuf{
@@ -131,11 +145,55 @@ impl FileOps {
 
         return truth_value
     }
-    pub fn set_config(&self, config_type: ConfigArg, value: String) -> io::Result<()> {
+
+    fn read_user_input(&self)-> String{
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).expect("unable to read user input");
+        input.trim().to_string()
+    }
+
+
+
+   pub fn setup_config_file(&self) {
+        loop {
+            println!("please provide the absolute path to the directory you would like to store daily logs");
+            let user_input = &self.read_user_input();
+            if user_input.is_empty() {
+                continue;
+            }
+            let path = Path::new(user_input);
+
+            if !path.is_absolute(){
+                println!("The path must be absolute");
+                break
+            }
+            let _res = match self.set_config(ConfigArg::Dir, path.display().to_string()){
+                Ok(_) => {}
+                Err(err) => {
+                    println!("{}", err);
+                    continue
+                }
+            };
+            println!("Path {}", path.display())
+        }
+    }
+
+    fn set_config(&self, config_type: ConfigArg, value: String) -> io::Result<()> {
         let config_path = self.config_file_path();
 
+        let prefix = config_path.parent().unwrap();
+        std::fs::create_dir_all(prefix).unwrap();
+
+        println!(" config path {}", config_path.display());
         // Create file if it doesn't exist, otherwise get it
-        let mut file = fs::File::create(config_path)?;
+        let mut file = match fs::File::create(config_path){
+            Ok(file ) => {file},
+            Err(err) => {
+                println!("179:: {}", err);
+                return Err(err);
+            }
+        };
+
 
         let mut config = self.config_args();
         match config_type {
@@ -143,13 +201,12 @@ impl FileOps {
             ConfigArg::Editor => config.editor = value,
             ConfigArg::FileExt => config.file_ext = value,
             ConfigArg::WithTemplate => {
-                config.with_template = self.bool_from_string(value);;
+                config.with_template = self.bool_from_string(value);
             }
         }
 
-        let json = serde_json::to_string(&config)?;
-
-        file.write_all(json.as_bytes())
+        let yaml = serde_yaml::to_string(&config);
+        file.write_all(yaml.unwrap().as_bytes())
     }
 }
 

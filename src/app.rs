@@ -44,8 +44,9 @@ impl App {
         // if there is a filename param, we should ignore the above function --
         // and attempt to retrieve the file from the directory specified in the config_path.
         // If the file does not exist, We should ask the user if they would like to create the file in that path
-        if self.file_ops.config_file_path().exists(){
-            println!("File exists {}", self.file_ops.config_file_path().display())
+        if !self.file_ops.config_file_path().exists(){
+            self.file_ops.setup_config_file()
+            //println!("File exists {}", self.file_ops.config_file_path().display())
             //dbg!("missing config — creating new config file")
         } else {
             // The config has already been setup
